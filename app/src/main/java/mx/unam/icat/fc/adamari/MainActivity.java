@@ -1,9 +1,5 @@
 package mx.unam.icat.fc.adamari;
 
-/**
- * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
- */
-
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -11,6 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+/**
+ * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
+ */
 
 public class MainActivity extends AppCompatActivity {
 
