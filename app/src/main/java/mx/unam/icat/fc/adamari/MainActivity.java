@@ -1,5 +1,9 @@
 package mx.unam.icat.fc.adamari;
 
+/**
+ * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
+ */
+
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
