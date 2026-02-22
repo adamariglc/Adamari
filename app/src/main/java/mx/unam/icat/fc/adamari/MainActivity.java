@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 /**
  * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
+ * Conflicto generado con Gustavo Angel Ortiz Vasquez
  */
 
 public class MainActivity extends AppCompatActivity {
