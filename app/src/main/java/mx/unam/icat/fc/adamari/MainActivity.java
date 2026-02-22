@@ -9,7 +9,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 /**
- * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc , tratando de generar un conflicto</a>
+ * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
  */
 
 public class MainActivity extends AppCompatActivity {
