@@ -8,7 +8,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-/**git
+/**
  * @author <a href=adamariglc@ciecnias.unam.mx> Adamari Gianina Lopez Cortes - @adamariglc </a>
  */
 
