@@ -1,19 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_background"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <ImageView
+        android:id="@+id/ivAppLogo"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription=""
+        android:src="@drawable/logo_app"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xl"
+        android:layout_marginEnd="@dimen/spacing_xxl"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:letterSpacing="0.25"
+        android:text="@string/app_name"
+        android:textColor="@color/color_primary"
+        android:textSize="@dimen/app_title_size"
+        app:layout_constraintStart_toEndOf="@id/ivAppLogo"
+        app:layout_constraintEnd_toStartOf="@id/btnStats"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnStats"
+        style="@style/Widget.FocusApp.Button.Icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="dimen/spacing_xs"
+        android:contentDescription="@string/cd_stats_icon"
+        android:src="@android:drawable/ic_menu_agenda"
+        app:layout_constraintBottom_toBottomOf="@id/btnSettings"
+        app:layout_constraintEnd_toStartOf="@id/btnSettings"
+        app:layout_constraintTop_toTopOf="@id/btnSettings"
+        app:tint="@color/color_text_secundary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
