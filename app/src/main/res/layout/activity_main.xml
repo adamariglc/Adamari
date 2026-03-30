@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_background"
+    android:background="@color/color_primary"
     tools:context=".MainActivity">
 
     <ImageView
@@ -14,7 +14,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:contentDescription=""
-        android:src="@drawable/logo_app"
+        android:src="@drawable/logo_app_background"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -23,13 +23,11 @@
         android:id="@+id/tvAppTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/spacing_xl"
-        android:layout_marginEnd="@dimen/spacing_xxl"
         android:fontFamily="sans-serif-condensed-medium"
         android:letterSpacing="0.25"
         android:text="@string/app_name"
         android:textColor="@color/color_primary"
-        android:textSize="@dimen/app_title_size"
+        android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@id/ivAppLogo"
         app:layout_constraintEnd_toStartOf="@id/btnStats"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,97 +37,121 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="48dp"
-        android:contentDescription="@string/cd_stats_icon"
         android:src="@android:drawable/ic_menu_agenda"
-        app:layout_constraintBottom_toBottomOf="@id/btnStats"
-        app:layout_constraintEnd_toEndOf="@id/btnStats"
-        app:layout_constraintTop_toTopOf="@id/btnStats"
-        app:layout_constraintVertical_bias="0.0"
-        app:tint="@color/color_text_secundary" />
+        app:layout_constraintEnd_toStartOf="@id/btnStats"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" app:tint="@color/color_secondary" />
 
     <ImageButton
         android:id="@+id/btnStats"
-        style="@style/Widget.FocusApp.Button.Icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginEnd="4dp"
-        android:contentDescription="@string/cd_stats_icon"
         android:src="@android:drawable/ic_menu_agenda"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_text_secundary" />
+        app:tint="@color/color_secondary" />
 
-    <Button
-        android:id="@+id/button"
+    <!-- ESTADO -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupMode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
-        tools:layout_editor_absoluteX="160dp"
-        tools:layout_editor_absoluteY="412dp"  />
+        android:layout_marginTop="@dimen/spacing_lg"
 
+        app:layout_constraintTop_toBottomOf="@id/ivAppLogo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+
+        app:singleSelection="true"
+        app:chipSpacingHorizontal="8dp">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipFocus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Focus"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipBreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Break"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipRest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rest"/>
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- TIMER -->
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="254dp"
-        android:layout_height="68dp"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="78dp"
-        tools:layout_editor_absoluteY="625dp" />
+        android:id="@+id/tvTimerDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="25:00"
+        android:textSize="@dimen/timer_text_size"
+        android:textStyle="bold"
 
-   <ImageButton
-       android:id="@+id/imageButtom"
-       android:layout_width="61dp"
-       android:layout_height="51dp"
-       tools:layout_editor_absoluteX="15dp"
-       tools:layout_editor_absoluteY="404dp"
-       tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintTop_toBottomOf="@id/chipGroupMode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="61dp"
-        android:layout_height="51dp"
-        app:srcCompat="@drawable/ic_launcher_background"
-        tools:layout_editor_absoluteX="332dp"
-        tools:layout_editor_absoluteY="404dp" />
 
+    <!-- BOTONES -->
+    <LinearLayout
+        android:id="@+id/layoutButtons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_md"
+        app:layout_constraintTop_toBottomOf="@id/tvTimerDisplay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStartStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Comenzar"
+            android:layout_marginStart="@dimen/spacing_sm"
+            android:layout_marginEnd="@dimen/spacing_sm"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSkip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip"/>
+    </LinearLayout>
+
+    <!-- PUNTOS -->
+    <LinearLayout
+        android:id="@+id/sessionDotsContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_md"
+        app:layout_constraintTop_toBottomOf="@id/layoutButtons"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- FRASE -->
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="194dp"
-        android:layout_height="29dp"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="109dp"
-        tools:layout_editor_absoluteY="273dp" />
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="221dp"
-        android:layout_height="45dp"
-        tools:layout_editor_absoluteX="93dp"
-        tools:layout_editor_absoluteY="87dp">
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="17dp"
-        android:layout_height="12dp"
-        tools:layout_editor_absoluteX="197dp"
-        tools:layout_editor_absoluteY="491dp">
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="194dp"
-        android:layout_height="29dp"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="109dp"
-        tools:layout_editor_absoluteY="153dp" />
-
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="247dp"
-        android:layout_height="71dp"
-        android:text="TextView"
-        tools:layout_editor_absoluteX="85dp"
-        tools:layout_editor_absoluteY="192dp" />
+        android:id="@+id/tvMotivation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="¡Tú puedes!"
+        android:layout_marginTop="@dimen/spacing_md"
+        app:layout_constraintTop_toBottomOf="@id/sessionDotsContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

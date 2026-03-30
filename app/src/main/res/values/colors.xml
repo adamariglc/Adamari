@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#BC4949</color>
-    <color name="white">#49BCBC</color>
+    <color name="color_primary">#A3CACF</color>
+    <color name="color_secondary">#B6B4C2</color>
+    <color name="color_border">#CCBBCE</color>
+    <color name="color_border_accent">#EBBFCE</color>
+    <color name="color_dott">#779DA6</color>
 </resources>
