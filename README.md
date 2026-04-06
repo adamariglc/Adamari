@@ -23,3 +23,6 @@ Pero no se como se haria eso.
 ¿Cómo harían para que el tiempo del temporizador se mantenga si el usuario minimiza la app?
 Se guaradria el tiempo en el que se deberia terminar, se crearia una nueva variable, para que de esta manera cuando se minimize pueda regresar a un estado, con un tiempo, siendo este calculado con 
 el tiempo en el que esta y en el que se deberia de terminar
+
+
+Con el cambio que hice, fue que se agregara un punto cada vez que este en FOCUS y aumenta el contador (solo hay 3 puntos por que en el 4 se reinicia, borra los puntos y cambia a REST) esto en onSessionFinished. Y ahora el addDot solo crea la bolita.
