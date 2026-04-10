@@ -1,4 +1,4 @@
-package mx.unam.icat.fc.adamari;
+package mx.unam.icat.fc.adamari.model;
 
 public class Session {
     private String type;      // Tipo de la sesion: Enfoque o Descanso
@@ -57,3 +57,4 @@ public class Session {
         this.completed = completed;
     }
 }
+

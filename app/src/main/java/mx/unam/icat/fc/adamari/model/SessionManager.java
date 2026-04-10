@@ -1,4 +1,4 @@
-package mx.unam.icat.fc.adamari;
+package mx.unam.icat.fc.adamari.model;
 
 import java.util.ArrayList;
 import java.util.List;
