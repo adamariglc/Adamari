@@ -1,5 +1,6 @@
 package mx.unam.icat.fc.adamari;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.res.ColorStateList;
 
@@ -16,12 +17,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+
+import mx.unam.icat.fc.adamari.model.SessionManager;
+import mx.unam.icat.fc.adamari.model.Session;
+import android.annotation.SuppressLint;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private int focusSessionsCompleted = 0;
     private MaterialButton btnReset;
     private MaterialButton btnSkip;
+    private SessionManager sessionManager;
+    private TextView tvSessionState;
 
     /**
      * TODO: Documentar.
@@ -73,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         setupClickListeners();
         // Actualizamos la IU.
         updateTimerDisplay(timeLeftMillis);
+
+        sessionManager = new SessionManager();
     }
 
     /**
@@ -81,7 +91,9 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
+        cancelTimer();
     }
 
 
@@ -104,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         sessionDotsContainer = findViewById(R.id.sessionDotsContainer);
         btnReset = findViewById(R.id.btnReset);
         btnSkip = findViewById(R.id.btnSkip);
+        tvSessionState = findViewById(R.id.tvSessionState);
     }
 
     /**
@@ -165,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onFinish() {
+
                 onSessionFinished();
             }
         }.start();
@@ -187,11 +201,27 @@ public class MainActivity extends AppCompatActivity {
      * TODO: reiniciar el contenedor de puntos o agregar un nuevo punto en el layout.
      * TODO: actualizar el texto que indica el numero de sesiones de enfoque completadas.
      */
+    @SuppressLint("MissingPermission")
     private void onSessionFinished() {
         timerState = TimerState.IDLE;
 
         if (currentMode == SessionMode.FOCUS) {
             focusSessionsCompleted++;
+            String type = currentMode.name();
+
+            // Fecha actual
+            String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
+
+            // Hora actual
+            String startTime = new java.text.SimpleDateFormat("HH:mm").format(new java.util.Date());
+
+            // Duración
+            int duration = (int) (FOCUS_DURATION_MS / 1000); // en segundos
+
+            boolean completed = true;
+
+            Session session = new Session(type, date, startTime, duration, completed);
+            sessionManager.addSession(session);
 
             addDot();
 
@@ -296,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
         int seconds = (int) (millis / 1000) % 60;
         // Actualizamos el texto del temporizador.
         tvTimerDisplay.setText(String.format("%02d:%02d", minutes, seconds));
+        tvSessionState.setText(currentMode.name());
     }
 
     /**

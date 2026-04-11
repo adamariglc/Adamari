@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false"> FocusMony </string>
+    <string name="app_name" translatable="false"> Adamari </string>
 
     <string name="mode_focus"> Focus </string>
     <string name="mode_break"> Break </string>
