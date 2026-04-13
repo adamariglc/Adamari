@@ -43,9 +43,10 @@ public class SessionHistoryActivity extends AppCompatActivity {
 
         bindViews();
         setupToolbar();
-        setupRecyclerView();
+        List<Session> sessions = sessionManager.getAllSessions();
+        setupRecyclerView(sessions);
         setupFilterLogic();
-        updateHistoryDisplay();
+        updateHistoryDisplay(sessions);
     }
 
     /**
@@ -94,28 +95,26 @@ public class SessionHistoryActivity extends AppCompatActivity {
      * Vincula la lista de sesiones obtenida del SessionManager con la
      * interfaz visual mediante el SessionHistoryAdapter.
      */
-    private void setupRecyclerView() {
+    private void setupRecyclerView(List<Session> sessions) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Obtenemos los datos iniciales.
-        List<Session> history = sessionManager.getAllSessions();
-
         // Inicializamos el adaptador.
-        adapter = new SessionHistoryAdapter(history, getResources());
+        adapter = new SessionHistoryAdapter(sessions, getResources());
         recyclerView.setAdapter(adapter);
     }
 
     /**
      * Gestiona la visibilidad de la UI y actualiza el contador.
      */
-    private void updateHistoryDisplay() {
+    private void updateHistoryDisplay(List<Session> sessions) {
         // TODO: Recuperar datos reales para el listado de sesiones.
-
-        List<Session> sessions = sessionManager.getAllSessions();
         boolean isEmpty = (sessions == null || sessions.isEmpty());
 
         layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+
+        //Actualizar el contador de resultados
+        int total = (sessions != null ? sessions.size() : 0);
 
         // TODO: Investigar cómo usar Plurals en strings.xml para manejar "1 sesión" vs "2 sesiones".
         String countText = getString(R.string.session_count, (sessions != null ? sessions.size() : 0));
@@ -126,5 +125,13 @@ public class SessionHistoryActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    private void filterByToday() {
+        List<Session> todaySessions = sessionManager.getTodaySessions();
+        // Creamos un nuevo adaptador con la lista filtrada
+        adapter = new SessionHistoryAdapter(todaySessions, getResources());
+        recyclerView.setAdapter(adapter);
+        updateHistoryDisplay(todaySessions); // Para que el contador se actualice
     }
 }

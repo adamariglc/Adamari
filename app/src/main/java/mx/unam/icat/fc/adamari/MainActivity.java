@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.os.VibratorManager;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import android.content.Context;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -328,43 +330,42 @@ public class MainActivity extends AppCompatActivity {
         // Actualizar el estado de la sesión actual en el objeto
         if (newSession != null) {
             newSession.setCompleted(true);
-            // Clonamos la referencia para evitar problemas de concurrencia
-            final Session sessionToSave = newSession;
-            databaseExecutor.execute(() -> {
-                // Esto ocurre fuera del hilo de la UI
-                sessionManager.saveSession(sessionToSave);
-
-                runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "Historial actualizado", Toast.LENGTH_SHORT).show();
-                });
-            });
+            sessionManager.saveSession(newSession);
         }
 
         // Lógica de transición de la técnica Pomodoro.
         if (currentMode == SessionMode.FOCUS) {
             focusSessionsCompleted++;
             addDot();
-            if (focusSessionsCompleted >= SESSIONS_BEFORE_REST) {
-                focusSessionsCompleted = 0;
-                currentMode = SessionMode.REST;
-            } else {
-                currentMode = SessionMode.BREAK;
-            }
+            currentMode = (focusSessionsCompleted >= SESSIONS_BEFORE_REST) ? SessionMode.REST : SessionMode.BREAK;
+            if (currentMode == SessionMode.REST) focusSessionsCompleted = 0;
         } else {
             currentMode = SessionMode.FOCUS;
         }
 
         // TODO: Verificar los casos en que la sesión puede marcarse como incompleta.
 
+        emitirVibracionFinal();
         Toast.makeText(this, "Sesión guardada en el historial", Toast.LENGTH_SHORT).show();
-
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (v != null) {
-            v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
-        }
 
         resetModeTime();
         btnStartStop.setText("Comenzar");
+    }
+
+    private void emitirVibracionFinal() {
+        Vibrator vibrator;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            VibratorManager vm = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+            vibrator = vm.getDefaultVibrator();
+        } else {
+            vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        }
+
+        if (vibrator != null && vibrator.hasVibrator()) {
+            // Un efecto de "doble pulso" se siente más como una notificación de éxito
+            long[] pattern = {0, 300, 200, 300};
+            vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+        }
     }
 
     /**
