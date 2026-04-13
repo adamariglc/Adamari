@@ -155,7 +155,7 @@
         android:includeFontPadding="false"
         android:letterSpacing="0.05"
         android:text="@string/timer_default_time"
-        android:textColor="@color/color_primary"
+        android:textColor="@color/color_border_accent"
         android:textSize="@dimen/timer_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -34,6 +34,8 @@ import com.google.android.material.chip.ChipGroup;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import mx.unam.icat.fc.adamari.model.SessionManager;
 import mx.unam.icat.fc.adamari.model.Session;
@@ -87,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     // Elementos para el registro de una sesión.
     private Session newSession;
     private boolean currentSessionIsCompleted = true;
+    private final ExecutorService databaseExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * TODO: Documentar.
@@ -169,6 +172,10 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
         cancelTimer();
+        //Para apagar el hilo de la base de datos y evitar fugas de memoria
+        if (databaseExecutor != null) {
+            databaseExecutor.shutdown();
+        }
     }
 
     @Override
@@ -321,8 +328,16 @@ public class MainActivity extends AppCompatActivity {
         // Actualizar el estado de la sesión actual en el objeto
         if (newSession != null) {
             newSession.setCompleted(true);
-            // Persistir el cambio inmediatamente en SQLite
-            sessionManager.saveSession(newSession);
+            // Clonamos la referencia para evitar problemas de concurrencia
+            final Session sessionToSave = newSession;
+            databaseExecutor.execute(() -> {
+                // Esto ocurre fuera del hilo de la UI
+                sessionManager.saveSession(sessionToSave);
+
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "Historial actualizado", Toast.LENGTH_SHORT).show();
+                });
+            });
         }
 
         // Lógica de transición de la técnica Pomodoro.

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="color_primary">#A3CACF</color>
-    <color name="color_secondary">#B6B4C2</color>
-    <color name="color_border">#CCBBCE</color>
-    <color name="color_border_accent">#EBBFCE</color>
+    <color name="color_secondary">#58695B</color>
+    <color name="color_border">#FF5353</color>
+    <color name="color_border_accent">#2F4F4F</color>
     <color name="color_dott">#779DA6</color>
     <color name="white">#FFFFFF</color>
 </resources>
