@@ -6,9 +6,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Calendar;
 
 /**
  * Gestiona el ciclo de vida de las tareas sugeridas dentro de la aplicación.
@@ -17,7 +22,7 @@ import java.util.List;
  * @version 1.3, feb 2026
  */
 public class SessionManager extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "FocusMony.db";
+    private static final String DATABASE_NAME = "Adamari.db";
     private static final int DATABASE_VERSION = 1;
 
     // Definición de los NOMBRES de las columnas de la tabla.
@@ -29,6 +34,7 @@ public class SessionManager extends SQLiteOpenHelper {
     public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_COMPLETED = "completed";
 
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * TODO: Documentar.
@@ -60,21 +66,22 @@ public class SessionManager extends SQLiteOpenHelper {
      * @param session ...
      */
     public void saveSession(Session session) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        // Ejecutamos en el hilo de fondo
+        executor.execute(() -> {
+            try (SQLiteDatabase db = this.getWritableDatabase()) {
+                ContentValues values = new ContentValues();
+                values.put(COLUMN_TYPE, session.getType());
+                values.put(COLUMN_DATE, session.getDate());
+                values.put(COLUMN_START, session.getStartTime());
+                values.put(COLUMN_DURATION, session.getDuration());
+                values.put(COLUMN_COMPLETED, session.isCompleted() ? 1 : 0);
 
-        // Mapeamos los atributos del objeto Session a las columnas de la DB
-        values.put(COLUMN_TYPE, session.getType());
-        values.put(COLUMN_DATE, session.getDate());
-        values.put(COLUMN_START, session.getStartTime());
-        values.put(COLUMN_DURATION, session.getDuration());
-
-        // Convertimos el boolean 'completed' a un entero (1 o 0) para SQLite
-        values.put(COLUMN_COMPLETED, session.isCompleted() ? 1 : 0);
-
-        // Insertamos la fila
-        db.insert(TABLE_SESSIONS, null, values);
-        db.close(); // Siempre cierra la conexión para evitar fugas de memoria
+                db.insert(TABLE_SESSIONS, null, values);
+                Log.d("SQLite", "Sesión guardada en segundo plano correctamente.");
+            } catch (Exception e) {
+                Log.e("SQLite", "Error al guardar sesión: " + e.getMessage());
+            }
+        });
     }
 
     /**
@@ -83,29 +90,16 @@ public class SessionManager extends SQLiteOpenHelper {
      */
     public List<Session> getAllSessions() {
         List<Session> sessionList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
 
         // Consultamos toda la tabla, ordenando por ID descendente (dejando la sesión más reciente primero)
-        Cursor cursor = db.query(TABLE_SESSIONS, null, null, null, null, null, COLUMN_ID + " DESC");
+        try (SQLiteDatabase db = getReadableDatabase();
+             Cursor cursor = db.query(TABLE_SESSIONS, null, null, null, null, null, COLUMN_ID + " DESC")) {
 
-        if (cursor.moveToFirst()) {
-            do {
-                Session session = new Session();
-                // Extraemos los datos usando el índice de la columna
-                session.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
-                session.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)));
-                session.setStartTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START)));
-                session.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION)));
-
-                // Convertimos el 1/0 de SQLite de vuelta a boolean
-                int completedInt = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMPLETED));
-                session.setCompleted(completedInt == 1);
-
-                sessionList.add(session);
-            } while (cursor.moveToNext());
+            while (cursor.moveToNext()) {
+                sessionList.add(cursorToSession(cursor));
+            }
         }
-        cursor.close();
-        db.close();
+
         return sessionList;
     }
 
@@ -119,39 +113,18 @@ public class SessionManager extends SQLiteOpenHelper {
      */
     public List<Session> getTodaySessions() {
         List<Session> sessionList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
 
         String todayDate = new java.text.SimpleDateFormat("dd/MM/yyyy")
                 .format(new java.util.Date());
+        try (SQLiteDatabase db = this.getReadableDatabase();
+             Cursor cursor = db.query(TABLE_SESSIONS, null, COLUMN_DATE + "=?",
+                     new String[]{todayDate},
+                     null, null, COLUMN_ID + " DESC")) {
 
-        Cursor cursor = db.query(
-                TABLE_SESSIONS,
-                null,
-                COLUMN_DATE + "=?",
-                new String[]{todayDate},
-                null,
-                null,
-                COLUMN_ID + " DESC"
-        );
-
-        if (cursor.moveToFirst()) {
-            do {
-                Session session = new Session();
-
-                session.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
-                session.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)));
-                session.setStartTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START)));
-                session.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION)));
-
-                int completedInt = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMPLETED));
-                session.setCompleted(completedInt == 1);
-
-                sessionList.add(session);
-            } while (cursor.moveToNext());
+            while (cursor.moveToNext()) {
+                sessionList.add(cursorToSession(cursor));
+            }
         }
-
-        cursor.close();
-        db.close();
 
         return sessionList;
     }
@@ -162,51 +135,44 @@ public class SessionManager extends SQLiteOpenHelper {
      */
     public List<Session> getThisWeekSessions() {
         List<Session> sessionList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
 
-        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
 
         // Ajustamos al inicio de la semana (lunes)
-        calendar.set(java.util.Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-        String startOfWeek = new java.text.SimpleDateFormat("dd/MM/yyyy")
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        String start = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 .format(calendar.getTime());
 
         // Fin de la semana (domingo)
-        calendar.add(java.util.Calendar.DAY_OF_WEEK, 6);
-        String endOfWeek = new java.text.SimpleDateFormat("dd/MM/yyyy")
+        calendar.add(Calendar.DAY_OF_WEEK, 6);
+        String end = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 .format(calendar.getTime());
 
-        Cursor cursor = db.query(
-                TABLE_SESSIONS,
-                null,
-                COLUMN_DATE + " BETWEEN ? AND ?",
-                new String[]{startOfWeek, endOfWeek},
-                null,
-                null,
-                COLUMN_ID + " DESC"
-        );
+        try (SQLiteDatabase db = getReadableDatabase();
+             Cursor cursor = db.query(TABLE_SESSIONS, null,
+                     COLUMN_DATE + " BETWEEN ? AND ?",
+                     new String[]{start, end},
+                     null, null, COLUMN_ID + " DESC")) {
 
-        if (cursor.moveToFirst()) {
-            do {
+            while (cursor.moveToNext()) {
+                sessionList.add(cursorToSession(cursor));
+            }
+        }
+
+        return sessionList;
+    }
+        /**
+         * Método auxiliar para evitar repetir código de mapeo de Cursor a Session.
+         */
+        private Session cursorToSession(Cursor cursor) {
                 Session session = new Session();
-
                 session.setType(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)));
                 session.setDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)));
                 session.setStartTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START)));
                 session.setDuration(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_DURATION)));
-
-                int completedInt = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMPLETED));
-                session.setCompleted(completedInt == 1);
-
-                sessionList.add(session);
-            } while (cursor.moveToNext());
+                session.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_COMPLETED)) == 1);
+                return session;
         }
-
-        cursor.close();
-        db.close();
-
-        return sessionList;
-    }
 
     /**
      * TODO: Documentar.
@@ -221,8 +187,6 @@ public class SessionManager extends SQLiteOpenHelper {
 
         // 2. Volvemos a crearla llamando al metodo onCreate
         onCreate(db);
-
-        Log.d("SQLite", "Base de datos actualizada de la versión " + oldVersion + " a la " + newVersion);
     }
 
     @Override
