@@ -114,6 +114,7 @@ public class SessionHistoryAdapter extends RecyclerView.Adapter<SessionHistoryAd
      */
     @Override
     public int getItemCount() {
+
         return DATASET.size();
     }
 }

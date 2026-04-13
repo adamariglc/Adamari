@@ -5,4 +5,5 @@
     <color name="color_border">#CCBBCE</color>
     <color name="color_border_accent">#EBBFCE</color>
     <color name="color_dott">#779DA6</color>
+    <color name="white">#FFFFFF</color>
 </resources>

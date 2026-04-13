@@ -81,7 +81,13 @@ import mx.unam.icat.fc.adamari.R;
          * TODO: Implementar este método para cambiar la configuración del idioma.
          */
         private void applyLanguage(String langCode) {
-            // Configurar la baseContext con el nuevo Locale.
+            java.util.Locale locale = new java.util.Locale(langCode);
+            java.util.Locale.setDefault(locale);
+
+            android.content.res.Configuration config = new android.content.res.Configuration();
+            config.setLocale(locale);
+
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
         }
 
         /**

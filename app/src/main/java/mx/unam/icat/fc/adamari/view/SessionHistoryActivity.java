@@ -59,7 +59,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
 
         // TODO: Vincular Chips mediante findViewById y asignar IDs correspondientes.
 
-        sessionManager = new SessionManager();
+        sessionManager = new SessionManager(this);
         // Puedes descomentar estas líneas para probar el diseño:
         /*
         sessionManager.addSession(new Session("Enfoque", "18 mar 2026", "15:00", 25, true));
@@ -98,7 +98,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Obtenemos los datos iniciales.
-        List<Session> history = sessionManager.getHistory();
+        List<Session> history = sessionManager.getAllSessions();
 
         // Inicializamos el adaptador.
         adapter = new SessionHistoryAdapter(history, getResources());
@@ -111,7 +111,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
     private void updateHistoryDisplay() {
         // TODO: Recuperar datos reales para el listado de sesiones.
 
-        List<Session> sessions = sessionManager.getHistory();
+        List<Session> sessions = sessionManager.getAllSessions();
         boolean isEmpty = (sessions == null || sessions.isEmpty());
 
         layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);

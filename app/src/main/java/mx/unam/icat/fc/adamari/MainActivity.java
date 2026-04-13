@@ -2,6 +2,8 @@ package mx.unam.icat.fc.adamari;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 
 import android.os.Bundle;
@@ -9,39 +11,58 @@ import android.os.CountDownTimer;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.RequiresPermission;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import mx.unam.icat.fc.adamari.model.SessionManager;
 import mx.unam.icat.fc.adamari.model.Session;
-import android.annotation.SuppressLint;
+import mx.unam.icat.fc.adamari.view.PreferencesActivity;
+import mx.unam.icat.fc.adamari.view.SessionHistoryActivity;
 
+/**
+ * Actividad principal que gestiona el ciclo de vida del temporizador Pomodoro.
+ * Esta clase coordina la interfaz de usuario, los estados de la sesión y la
+ * lógica de temporización utilizando CountDownTimer.
+ * @author <a href="adamariglc@ciencias.unam.mx" > Lopez Cortes Adamari Gianina </a> - @adamariglc
+ * @version 1.3, mar 2026 (esqueleto para alumnos)
+ */
 public class MainActivity extends AppCompatActivity {
 
-    // Estados del temporizador y sesion.
+    /** Estados posibles del temporizador. */
     enum TimerState { IDLE, RUNNING, PAUSED }
+
+    /** Modos de sesión según la técnica Pomodoro. */
     enum SessionMode { FOCUS, BREAK, REST}
 
-    // Constantes de tiempo en milisegundos.
-    private static final long FOCUS_DURATION_MS   = 25 * 60 * 1000L;
+    // Constantes de configuración.
+    private static final long FOCUS_DURATION_MS   = 1 * 60 * 1000L;
     private static final long BREAK_DURATION_MS   =  5 * 60 * 1000L;
     private static final long REST_DURATION_MS    = 15 * 60 * 1000L;
     private static final int SESSIONS_BEFORE_REST = 4;
 
     // Elementos de la IU.
+    private Toolbar toolbar;
     private TextView tvAppTittle;
     private ImageButton btnStats, btnSettings;
     private ChipGroup chipGroupMode;
@@ -59,10 +80,13 @@ public class MainActivity extends AppCompatActivity {
     private SessionMode currentMode = SessionMode.FOCUS;
     private long timeLeftMillis = FOCUS_DURATION_MS;
     private int focusSessionsCompleted = 0;
-    private MaterialButton btnReset;
-    private MaterialButton btnSkip;
+    private ImageButton btnReset;
+    private ImageButton btnSkip;
     private SessionManager sessionManager;
     private TextView tvSessionState;
+    // Elementos para el registro de una sesión.
+    private Session newSession;
+    private boolean currentSessionIsCompleted = true;
 
     /**
      * TODO: Documentar.
@@ -77,12 +101,63 @@ public class MainActivity extends AppCompatActivity {
 
         // Inicializamos los elementos de la IU.
         bindViews();
+        // Llamamos al controlador.
+        sessionManager = new SessionManager(this);
+        // Habilitamos nuestra barra de herramientas.
+        setSupportActionBar(toolbar);
         // Asignamos los escuchas.
         setupClickListeners();
         // Actualizamos la IU.
         updateTimerDisplay(timeLeftMillis);
+    }
 
-        sessionManager = new SessionManager();
+    /**
+     * Inicializa el menú de opciones superior (Overflow menu).
+     * @param menu Objeto menú donde se inflarán las opciones.
+     * @return true para que el menú sea visible.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    /**
+     * Maneja la selección de ítems en el menú de la Toolbar.
+     * @param item Ítem del menú seleccionado.
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_history) {
+            startActivity(new Intent(this, SessionHistoryActivity.class));
+        }
+
+        if (id == R.id.action_preferences) {
+            startActivity(new Intent(this, PreferencesActivity.class));
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Gestiona el comportamiento de pantalla completa inmersiva.
+     * Se activa cada vez que la aplicación vuelve al primer plano.
+     */
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
     }
 
     /**
@@ -96,6 +171,16 @@ public class MainActivity extends AppCompatActivity {
         cancelTimer();
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Guardamos el tiempo restante y el modo para que,
+        // si el sistema recrea la actividad, no se pierda el progreso.
+        outState.putLong("timeLeft", timeLeftMillis);
+        outState.putString("mode", currentMode.name());
+        outState.putInt("sessions", focusSessionsCompleted);
+    }
+
 
     /**
      * TODO: Documentar.
@@ -105,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
      * TODO: inicializar el texto para la frase motivadora.
      */
     private void bindViews() {
+        toolbar = findViewById(R.id.tbMenu);
         btnStats = findViewById(R.id.btnStats);
         btnSettings = findViewById(R.id.btnSettings);
         chipGroupMode = findViewById(R.id.chipGroupMode);
@@ -152,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
      * TODO: Documentar.
      */
     private void startTimer() {
+        // Mantiene la pantalla encendida.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // Actualizamos el estado del temporizador.
         timerState = TimerState.RUNNING;
         // Asignamos una texto mas adecuado al boton que controla nuestro temporizador.
@@ -160,6 +248,27 @@ public class MainActivity extends AppCompatActivity {
 
         // PRUEBA
         // addDot();
+
+        // Registramos una nueva sesión.
+        newSession = new Session();
+        newSession.setType(currentMode.name());
+        newSession.setCompleted(false); // Por defecto inicia incompleta
+        newSession.setDate(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()));
+        newSession.setStartTime(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
+
+        if (currentMode == SessionMode.FOCUS) {
+            newSession.setType(getString(R.string.mode_focus));
+            newSession.setDuration(25);
+        } else if (currentMode == SessionMode.BREAK) {
+            newSession.setType(getString(R.string.mode_break));
+            newSession.setDuration(5);
+        } else {
+            newSession.setType(getString(R.string.mode_long_break));
+            newSession.setDuration(15);
+        }
+
+        newSession.setDate(new SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault()).format(new Date()));
+        newSession.setStartTime(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));;
 
         // Creamos e inicializamos un contador.
         countDownTimer = new CountDownTimer(timeLeftMillis, 1000) {
@@ -188,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
      * TODO: Documentar.
      */
     private void pauseTimer() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // Detenemos nuestro contador.
         if (countDownTimer != null) countDownTimer.cancel();
         // Actualizamos el estado de nuestro temporizador.
@@ -201,45 +311,37 @@ public class MainActivity extends AppCompatActivity {
      * TODO: reiniciar el contenedor de puntos o agregar un nuevo punto en el layout.
      * TODO: actualizar el texto que indica el numero de sesiones de enfoque completadas.
      */
-    @SuppressLint("MissingPermission")
+
     private void onSessionFinished() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        cancelTimer();
+        // Actualizamos el estado de nuestro temporizador.
         timerState = TimerState.IDLE;
 
+        // Actualizar el estado de la sesión actual en el objeto
+        if (newSession != null) {
+            newSession.setCompleted(true);
+            // Persistir el cambio inmediatamente en SQLite
+            sessionManager.saveSession(newSession);
+        }
+
+        // Lógica de transición de la técnica Pomodoro.
         if (currentMode == SessionMode.FOCUS) {
             focusSessionsCompleted++;
-            String type = currentMode.name();
-
-            // Fecha actual
-            String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
-
-            // Hora actual
-            String startTime = new java.text.SimpleDateFormat("HH:mm").format(new java.util.Date());
-
-            // Duración
-            int duration = (int) (FOCUS_DURATION_MS / 1000); // en segundos
-
-            boolean completed = true;
-
-            Session session = new Session(type, date, startTime, duration, completed);
-            sessionManager.addSession(session);
-
             addDot();
-
             if (focusSessionsCompleted >= SESSIONS_BEFORE_REST) {
                 focusSessionsCompleted = 0;
-
-                sessionDotsContainer.removeAllViews();
-
                 currentMode = SessionMode.REST;
             } else {
                 currentMode = SessionMode.BREAK;
             }
-
         } else {
             currentMode = SessionMode.FOCUS;
         }
 
-        Toast.makeText(this, "Sesión terminada", Toast.LENGTH_SHORT).show();
+        // TODO: Verificar los casos en que la sesión puede marcarse como incompleta.
+
+        Toast.makeText(this, "Sesión guardada en el historial", Toast.LENGTH_SHORT).show();
 
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (v != null) {
@@ -272,9 +374,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private void resetModeTime() {
         // Reasignamos la duracion de la sesion segun el estado actual.
-        if (currentMode == SessionMode.FOCUS) timeLeftMillis = FOCUS_DURATION_MS;
-        else if (currentMode == SessionMode.BREAK) timeLeftMillis = BREAK_DURATION_MS;
-        else timeLeftMillis = REST_DURATION_MS;
+        switch (currentMode) {
+            case FOCUS: timeLeftMillis = FOCUS_DURATION_MS; break;
+            case BREAK: timeLeftMillis = BREAK_DURATION_MS; break;
+            case REST:  timeLeftMillis = REST_DURATION_MS; break;
+        }
         // Actualizamos la IU.
         updateTimerDisplay(timeLeftMillis);
     }
@@ -283,6 +387,8 @@ public class MainActivity extends AppCompatActivity {
      * TODO: Documentar.
      */
     private void cancelTimer() {
+        // Si el temporizador esta activo:
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // Si el temporizador esta activo:
         if (countDownTimer != null) {
             // Detemos el tiempo.
