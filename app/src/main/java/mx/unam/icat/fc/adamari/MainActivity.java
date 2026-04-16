@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.VibrationEffect;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Elementos de la IU.
     private Toolbar toolbar;
-    private TextView tvAppTittle;
+    private TextView tvAppTitle;
     private ImageButton btnStats, btnSettings;
     private ChipGroup chipGroupMode;
     private Chip chipFocus, chipBreak, chipRest;
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnSkip;
     private SessionManager sessionManager;
     private TextView tvSessionState;
+    private TextView tvSessionsCount;
     // Elementos para el registro de una sesión.
     private Session newSession;
     private boolean currentSessionIsCompleted = true;
@@ -154,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if(hasFocus) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -200,8 +203,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private void bindViews() {
         toolbar = findViewById(R.id.tbMenu);
-        btnStats = findViewById(R.id.btnStats);
-        btnSettings = findViewById(R.id.btnSettings);
         chipGroupMode = findViewById(R.id.chipGroupMode);
         chipFocus = findViewById(R.id.chipFocus);
         chipBreak = findViewById(R.id.chipBreak);
@@ -211,36 +212,35 @@ public class MainActivity extends AppCompatActivity {
         sessionDotsContainer = findViewById(R.id.sessionDotsContainer);
         btnReset = findViewById(R.id.btnReset);
         btnSkip = findViewById(R.id.btnSkip);
-        tvSessionState = findViewById(R.id.tvSessionState);
+        tvSessionState = findViewById(R.id.tvSessionLabel);
+        tvSessionsCount = findViewById(R.id.tvSessionsCount);
     }
 
     /**
      * TODO: Documentar.
      */
     private void setupClickListeners() {
-        // Asignamos un escucha al boton que controla nuestro temporizador.
+        // 1. Botón principal: Iniciar / Pausar
         btnStartStop.setOnClickListener(v -> {
-            // Se ha seleccionado la opcion para comenzar/pausar el temporizador.
-            // Llamamos a los metodos correspondientes segun el estado del temporizador.
-            if (timerState == TimerState.RUNNING) pauseTimer();
-            else startTimer();
-        });
-        btnReset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetTimer();
+            if (timerState == TimerState.RUNNING) {
+                pauseTimer();
+            } else {
+                startTimer();
             }
         });
 
-        btnSkip.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                skipToNextSession();
-            }
-        });
+        // 2. Botón de Reinicio (Uso de lambda para mayor limpieza)
+        btnReset.setOnClickListener(v -> resetTimer());
 
-        btnStats.setOnClickListener(null);
-        btnSettings.setOnClickListener(null);
+        // 3. Botón de Saltar sesión
+        btnSkip.setOnClickListener(v -> skipToNextSession());
+
+        // 4. Eliminamos o comentamos los botones que no están en el XML
+        // Si intentas hacerles setOnClickListener y son null, la app se cerrará.
+    /*
+    if (btnStats != null) btnStats.setOnClickListener(v -> abrirEstadisticas());
+    if (btnSettings != null) btnSettings.setOnClickListener(v -> abrirAjustes());
+    */
     }
 
     /**
@@ -350,21 +350,26 @@ public class MainActivity extends AppCompatActivity {
 
         resetModeTime();
         btnStartStop.setText("Comenzar");
+        // Actualizar el contador visual de sesiones completadas
+        TextView tvSessionsCount = findViewById(R.id.tvSessionsCount);
+        tvSessionsCount.setText(getString(R.string.sessionsCount, focusSessionsCompleted));
     }
 
+    @android.annotation.SuppressLint("MissingPermission")
     private void emitirVibracionFinal() {
-        Vibrator vibrator;
+        // Definimos 'vibrator' como variable local
+        android.os.Vibrator vibrator;
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            VibratorManager vm = (VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
-            vibrator = vm.getDefaultVibrator();
+            android.os.VibratorManager vm = (android.os.VibratorManager) getSystemService(Context.VIBRATOR_MANAGER_SERVICE);
+            vibrator = (vm != null) ? vm.getDefaultVibrator() : null;
         } else {
-            vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         }
 
         if (vibrator != null && vibrator.hasVibrator()) {
-            // Un efecto de "doble pulso" se siente más como una notificación de éxito
             long[] pattern = {0, 300, 200, 300};
-            vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+            vibrator.vibrate(android.os.VibrationEffect.createWaveform(pattern, -1));
         }
     }
 
@@ -442,13 +447,29 @@ public class MainActivity extends AppCompatActivity {
      * @param millis ...
      */
     private void updateTimerDisplay(long millis) {
-        // Resaltamos el chip correspondiente al estado actual del temporizador.
+        // 1. Resaltamos el chip visual según el modo (Focus, Break, Rest)
         selectChipForMode(currentMode);
+
+        // 2. Cálculo de tiempo
         int minutes = (int) (millis / 1000) / 60;
         int seconds = (int) (millis / 1000) % 60;
-        // Actualizamos el texto del temporizador.
-        tvTimerDisplay.setText(String.format("%02d:%02d", minutes, seconds));
-        tvSessionState.setText(currentMode.name());
+
+        // 3. Actualizamos el reloj (ej: 25:00)
+        tvTimerDisplay.setText(String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds));
+
+        // 4. Actualizamos el texto del estado de la sesión usando tus strings.xml
+        // Esto asegura que diga "Enfoque" en español y "Focus" en inglés.
+        switch (currentMode) {
+            case FOCUS:
+                tvSessionState.setText(R.string.mode_focus);
+                break;
+            case BREAK:
+                tvSessionState.setText(R.string.mode_break);
+                break;
+            case REST:
+                tvSessionState.setText(R.string.mode_long_break);
+                break;
+        }
     }
 
     /**

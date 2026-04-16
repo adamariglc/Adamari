@@ -3,21 +3,17 @@ plugins {
 }
 
 android {
-    namespace 'mx.unam.icat.fc.adamari'
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    namespace = 'mx.unam.icat.fc.adamari'
+    compileSdk = 36
 
     defaultConfig {
-        applicationId "mx.unam.icat.fc.adamari"
-        minSdk 26
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
+        applicationId = "mx.unam.icat.fc.adamari"
+        minSdk = 26
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -33,12 +29,12 @@ android {
 }
 
 dependencies {
+
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation "androidx.preference:preference:1.2.1"
+    implementation libs.preference
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

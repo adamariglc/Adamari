@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
+    <string name="app_name">Adamari</string>
+
+    <string name="theme_preference_key">theme_pref</string>
+    <string name="lang_preference_key">lang_pref</string>
+    <string name="theme_light_id">light</string>
+    <string name="theme_dark_id">dark</string>
+
     <string name="mode_focus"> Enfoque </string>
     <string name="mode_break"> Descanso </string>
     <string name="mode_long_break"> Descanso largo </string>
@@ -27,6 +35,9 @@
     <string name="history_empty_title"> No hay sesiones registradas </string>
     <string name="history_empty_desc"> ¡Comienza tu primer sesión! </string>
 
-    <string name="session_count"> %1$d sesiones </string>
+    <plurals name="session_count_plural">
+        <item quantity="one">%1$d sesión</item>
+        <item quantity="many">%1$d sesiones</item>
+    </plurals>
     <string name="title_preferences"> Preferencias </string>
 </resources>

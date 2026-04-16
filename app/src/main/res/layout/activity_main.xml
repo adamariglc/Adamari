@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_primary"
-    tools:context="mx.unam.icat.fc.adamari.MainActivity">
+    tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/tbMenu"
@@ -16,6 +14,45 @@
         android:layout_marginTop="@dimen/spacing_xl"
         app:titleTextColor="@color/color_primary"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/chip_group_margin_top"
+        app:chipSpacingHorizontal="@dimen/chip_spacing"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tbMenu"
+        app:selectionRequired="true"
+        app:singleLine="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipFocus"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/btn_secondary_height"
+            android:checked="true"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:text="@string/mode_focus" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipBreak"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/btn_secondary_height"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:text="@string/mode_break" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipRest"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/btn_secondary_height"
+            android:paddingStart="@dimen/spacing_md"
+            android:paddingEnd="@dimen/spacing_md"
+            android:text="@string/mode_long_break" />
+    </com.google.android.material.chip.ChipGroup>
 
     <TextView
         android:id="@+id/tvSessionLabel"
@@ -32,6 +69,23 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
+        android:id="@+id/tvTimerDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription=""
+        android:fontFamily="sans-serif-condensed-medium"
+        android:includeFontPadding="false"
+        android:letterSpacing="0.05"
+        android:text="@string/timer_default_time"
+        android:textColor="@color/color_primary"
+        android:textSize="@dimen/timer_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="25:00" />
+
+    <TextView
         android:id="@+id/tvSessionsCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -44,127 +98,6 @@
         app:layout_constraintTop_toBottomOf="@id/tvTimerDisplay"
         tools:text="@string/sessionsCount" />
 
-    <TextView
-        android:id="@+id/tvQuote"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-light"
-        android:gravity="center"
-        android:lineSpacingMultiplier="1.4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:padding="@dimen/spacing_md"
-        android:textColor="@color/color_secondary"
-        android:textSize="@dimen/quote_text_size"
-        tools:text="@string/quote" />
-
-    <ImageView
-        android:id="@+id/ivAppLogo"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:contentDescription=""
-        android:src="@drawable/logo_app_background"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvAppTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-condensed-medium"
-        android:letterSpacing="0.25"
-        android:text="@string/app_name"
-        android:textColor="@color/color_primary"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@id/ivAppLogo"
-        app:layout_constraintEnd_toStartOf="@id/btnStats"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
-        android:id="@+id/btnSettings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="48dp"
-        android:src="@android:drawable/ic_menu_agenda"
-        app:layout_constraintEnd_toStartOf="@id/btnStats"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" app:tint="@color/color_secondary" />
-
-    <ImageButton
-        android:id="@+id/btnStats"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="4dp"
-        android:src="@android:drawable/ic_menu_agenda"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_secondary" />
-
-    <!-- ESTADO -->
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/chip_group_margin_top"
-        app:chipSpacingHorizontal="@dimen/chip_spacing"
-
-        app:layout_constraintTop_toBottomOf="@id/tbMenu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-
-        app:selectionRequired="true"
-        app:singleLine="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipFocus"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/btn_secondary_height"
-            android:checked="true"
-            android:paddingStart="@dimen/spacing_md"
-            android:paddingEnd="@dimen/spacing_md"
-            android:text="@string/mode_focus"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipBreak"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/btn_secondary_height"
-            android:paddingStart="@dimen/spacing_md"
-            android:paddingEnd="@dimen/spacing_md"
-            android:text="@string/mode_break"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipRest"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/btn_secondary_height"
-            android:paddingStart="@dimen/spacing_md"
-            android:paddingEnd="@dimen/spacing_md"
-            android:text="@string/mode_long_break"/>
-
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- TIMER -->
-    <TextView
-        android:id="@+id/tvTimerDisplay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription=""
-        android:fontFamily="sans-serif-condensed-medium"
-        android:includeFontPadding="false"
-        android:letterSpacing="0.05"
-        android:text="@string/timer_default_time"
-        android:textColor="@color/color_border_accent"
-        android:textSize="@dimen/timer_text_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="25:00"/>
-
-
-    <!-- BOTONES -->
     <ImageButton
         android:id="@+id/btnReset"
         android:layout_width="44dp"
@@ -204,7 +137,6 @@
         app:layout_constraintTop_toTopOf="@id/btnStartStop"
         app:tint="@color/color_secondary" />
 
-    <!-- PUNTOS -->
     <LinearLayout
         android:id="@+id/sessionDotsContainer"
         android:layout_width="wrap_content"
@@ -215,23 +147,21 @@
         android:layout_marginBottom="@dimen/spacing_lg"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnStartStop"/>
+        app:layout_constraintTop_toBottomOf="@id/btnStartStop" />
 
-    <!-- FRASE -->
     <TextView
-        android:id="@+id/tvMotivation"
-        android:layout_width="wrap_content"
+        android:id="@+id/tvQuote"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="¡Tú puedes!"
-        android:layout_marginTop="@dimen/spacing_md"
-        app:layout_constraintTop_toBottomOf="@id/sessionDotsContainer"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <TextView
-        android:id="@+id/tvSessionState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="FOCUS"/>
+        android:padding="@dimen/spacing_md"
+        android:textColor="@color/color_secondary"
+        android:textSize="@dimen/quote_text_size"
+        tools:text="@string/quote" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

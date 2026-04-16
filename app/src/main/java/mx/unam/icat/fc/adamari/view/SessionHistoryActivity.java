@@ -41,11 +41,27 @@ public class SessionHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history_session);
 
+        // 1. Vincular vistas primero (incluyendo la inicialización del manager)
         bindViews();
+
+        // 2. Configurar la Toolbar (UI estática)
         setupToolbar();
+
+        // 3. Obtener los datos (Lógica de negocio)
         List<Session> sessions = sessionManager.getAllSessions();
+
+        // 4. Protección: Si la lista es null, inicializarla vacía para evitar crash
+        if (sessions == null) {
+            sessions = new java.util.ArrayList<>();
+        }
+
+        // 5. Configurar el RecyclerView con la lista (ya sea llena o vacía)
         setupRecyclerView(sessions);
+
+        // 6. Configurar clics y filtros (Interacción)
         setupFilterLogic();
+
+        // 7. Refrescar la pantalla (Contadores y Empty State)
         updateHistoryDisplay(sessions);
     }
 
@@ -57,10 +73,9 @@ public class SessionHistoryActivity extends AppCompatActivity {
         tvResultCount = findViewById(R.id.tvResultCount);
         layoutEmpty = findViewById(R.id.layoutEmpty);
         recyclerView = findViewById(R.id.recyclerViewHistory);
-
+        sessionManager = new SessionManager(this);
         // TODO: Vincular Chips mediante findViewById y asignar IDs correspondientes.
 
-        sessionManager = new SessionManager(this);
         // Puedes descomentar estas líneas para probar el diseño:
         /*
         sessionManager.addSession(new Session("Enfoque", "18 mar 2026", "15:00", 25, true));
@@ -106,18 +121,21 @@ public class SessionHistoryActivity extends AppCompatActivity {
     /**
      * Gestiona la visibilidad de la UI y actualiza el contador.
      */
+    /**
+     * Gestiona la visibilidad de la UI y actualiza el contador.
+     */
     private void updateHistoryDisplay(List<Session> sessions) {
-        // TODO: Recuperar datos reales para el listado de sesiones.
-        boolean isEmpty = (sessions == null || sessions.isEmpty());
+        // 1. Calculamos el total y verificamos si la lista está vacía
+        int total = (sessions != null ? sessions.size() : 0);
+        boolean isEmpty = (total == 0);
 
+        // 2. Controlamos la visibilidad de los componentes
         layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
 
-        //Actualizar el contador de resultados
-        int total = (sessions != null ? sessions.size() : 0);
-
-        // TODO: Investigar cómo usar Plurals en strings.xml para manejar "1 sesión" vs "2 sesiones".
-        String countText = getString(R.string.session_count, (sessions != null ? sessions.size() : 0));
+        // 3. ACTUALIZACIÓN DEL CONTADOR
+        // Usamos el plural para que diga "1 sesión" o "X sesiones" correctamente
+        String countText = getResources().getQuantityString(R.plurals.session_count_plural, total, total);
         tvResultCount.setText(countText);
     }
 

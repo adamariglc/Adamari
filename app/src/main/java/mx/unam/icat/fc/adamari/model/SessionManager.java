@@ -108,14 +108,17 @@ public class SessionManager extends SQLiteOpenHelper {
     //  + de esta semana.
 
     /**
-     * Metodo para filtrar por dia
-     * @return
+     * Metodo para filtrar por dia.
+     * IMPORTANTE: Asegúrate de que al guardar la sesión (saveSession),
+     * el formato de session.getDate() coincida con este.
      */
     public List<Session> getTodaySessions() {
         List<Session> sessionList = new ArrayList<>();
 
-        String todayDate = new java.text.SimpleDateFormat("dd/MM/yyyy")
-                .format(new java.util.Date());
+        // Usamos el formato amigable que definiste para mostrar en la UI
+        String todayDate = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault())
+                .format(new Date());
+
         try (SQLiteDatabase db = this.getReadableDatabase();
              Cursor cursor = db.query(TABLE_SESSIONS, null, COLUMN_DATE + "=?",
                      new String[]{todayDate},
@@ -125,38 +128,51 @@ public class SessionManager extends SQLiteOpenHelper {
                 sessionList.add(cursorToSession(cursor));
             }
         }
-
         return sessionList;
     }
 
     /**
-     * Metodo para filtrar por semana
-     * @return
+     * Metodo para filtrar por semana.
+     * Para que esto funcione con texto, calculamos los días de la semana
+     * y buscamos coincidencias exactas (IN clause) o cambiamos a formato ISO.
      */
     public List<Session> getThisWeekSessions() {
         List<Session> sessionList = new ArrayList<>();
-
         Calendar calendar = Calendar.getInstance();
 
-        // Ajustamos al inicio de la semana (lunes)
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-        String start = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                .format(calendar.getTime());
+        // Buscaremos las sesiones de los últimos 7 días
+        // para evitar el error del formato dd/MM/yyyy en SQLite
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.getDefault());
+        List<String> daysOfCurrentWeek = new ArrayList<>();
 
-        // Fin de la semana (domingo)
-        calendar.add(Calendar.DAY_OF_WEEK, 6);
-        String end = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                .format(calendar.getTime());
+        // Retrocedemos al inicio de la semana (Lunes)
+        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+
+        // Obtenemos los 7 strings de la semana actual
+        for (int i = 0; i < 7; i++) {
+            daysOfCurrentWeek.add(sdf.format(calendar.getTime()));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        // Construimos la consulta con la cláusula IN (?,?,?,?,?,?,?)
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < daysOfCurrentWeek.size(); i++) {
+            placeholders.append("?");
+            if (i < daysOfCurrentWeek.size() - 1) placeholders.append(",");
+        }
+
+        String query = "SELECT * FROM " + TABLE_SESSIONS +
+                " WHERE " + COLUMN_DATE + " IN (" + placeholders + ")" +
+                " ORDER BY " + COLUMN_ID + " DESC";
 
         try (SQLiteDatabase db = getReadableDatabase();
-             Cursor cursor = db.query(TABLE_SESSIONS, null,
-                     COLUMN_DATE + " BETWEEN ? AND ?",
-                     new String[]{start, end},
-                     null, null, COLUMN_ID + " DESC")) {
+             Cursor cursor = db.rawQuery(query, daysOfCurrentWeek.toArray(new String[0]))) {
 
             while (cursor.moveToNext()) {
                 sessionList.add(cursorToSession(cursor));
             }
+        } catch (Exception e) {
+            Log.e("SQLite", "Error en filtrado semanal: " + e.getMessage());
         }
 
         return sessionList;
