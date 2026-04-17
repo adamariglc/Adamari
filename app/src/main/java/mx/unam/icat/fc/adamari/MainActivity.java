@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
         newSession = new Session();
         newSession.setType(currentMode.name());
         newSession.setCompleted(false); // Por defecto inicia incompleta
-        newSession.setDate(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()));
+        newSession.setDate(new SimpleDateFormat("EEE, dd/MM/yyyy", Locale.getDefault()).format(new Date()));
         newSession.setStartTime(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()));
 
         if (currentMode == SessionMode.FOCUS) {

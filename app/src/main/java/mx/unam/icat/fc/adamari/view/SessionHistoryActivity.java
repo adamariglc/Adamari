@@ -90,6 +90,7 @@ public class SessionHistoryActivity extends AppCompatActivity {
      */
     private void setupFilterLogic() {
         // TODO (Opcional): Implementar el funcionamiento del ChipGroup (filtrado).
+
     }
 
     /**
