@@ -27,6 +27,8 @@ el tiempo en el que esta y en el que se deberia de terminar
 
 Con el cambio que hice, fue que se agregara un punto cada vez que este en FOCUS y aumenta el contador (solo hay 3 puntos por que en el 4 se reinicia, borra los puntos y cambia a REST) esto en onSessionFinished. Y ahora el addDot solo crea la bolita.
 
+López Cortes Adamari Gianina
+320268458
 
 Practica 3:
 En esta practica lo que hicimos fue agregar la base de datos para que se guarde el historial de sesiones del uruario.
@@ -47,3 +49,5 @@ En SessionHistoryAdapter lo que hace es tomar la lista de sessiones y reciclamos
 Y en el MainActivity lo que hace es el flujo de la aplicacion, es decir, se crea sesión, empieza timer, termina onSessionFinished(), se guarda en SQLite, cambia modo y la UI se actualiza
 
 Lo que más me costo trabajo fue que eran muchos archivos, y pues algunos (AndroidManifest) no los puse en donde iban y con eso no me dejaba compilar, y en el build tenia que fijarme que todo estuviera bien y pues en general en cada uno de los archivos, y en especial el orden. Fueron muchas cosas al mismo tiempo y me confundi un poco. Igual creo que otra cosa que se me complico, fue hacer lo de por semana, por que no se puede hacer la comparacion e hice la lsita de dias y ya de esta forma se logro realizar la consulta.
+
+Pues algo que haria diferente, es ponerle dibujitos o animaciones quizas, en cuestion de funcionalidades, tal vez que se pueda configurar el tiempo, como si quisieras estudiar por mas tiempo o si quieres tomar un descanso más largo.
