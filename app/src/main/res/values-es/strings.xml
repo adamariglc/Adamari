@@ -37,7 +37,7 @@
 
     <plurals name="session_count_plural">
         <item quantity="one">%1$d sesión</item>
-        <item quantity="many">%1$d sesiones</item>
+        <item quantity="other">%1$d sesiones</item>
     </plurals>
     <string name="title_preferences"> Preferencias </string>
 </resources>
