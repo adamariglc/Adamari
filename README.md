@@ -26,3 +26,24 @@ el tiempo en el que esta y en el que se deberia de terminar
 
 
 Con el cambio que hice, fue que se agregara un punto cada vez que este en FOCUS y aumenta el contador (solo hay 3 puntos por que en el 4 se reinicia, borra los puntos y cambia a REST) esto en onSessionFinished. Y ahora el addDot solo crea la bolita.
+
+
+Practica 3:
+En esta practica lo que hicimos fue agregar la base de datos para que se guarde el historial de sesiones del uruario.
+En AndroidManifest, lo que hacemos es pedir requisitos del celular para nuestra aplicacion, y pues agregamos nuestras vistas.
+Y en los strings tenemos la configuracion del idioma, tanto en español como en ingles, por eso hay dos strings, en estos en la parte para contar las sessiones, usamos un plural, por que pues pueden ser varias sesiones, usando "one" y "other".
+En SessionHistoryActivity, en bindViews() cramos el SessionManager y en sessionManager = new SessionManager(this) conectamos con la base de datos. 
+List<Session> sessions = sessionManager.getAllSessions() obtenemos todas las sesiones que esten en la base de datos y las recuperamos en una lista. 
+setupRecyclerView() creamos el adapter, y definimos como mostrar los elementos que se hizo verticalmente. 
+layoutEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+Si no hay sesiones se muestra mensaje vacio y se oculta lista, y si, si hay entonces muestra la lista y oculta el mensaje.
+
+En SessionManager tecnicamente es como la base de datos, ya que en esta se crean, se guardan y consultan las sesiones. 
+En filtrar por dias lo que hace es consultar con el mismo foramto con el que se guardo que es "EEE, dd MMM yyyy". Mientras que en el filtro por semana no se puede realizar esa comparacion, entonces lo que hicimos fue crear una lista por dias List<String> daysOfCurrentWeek y luego realizamos la consulta.
+
+En SessionHistoryAdapter lo que hace es tomar la lista de sessiones y reciclamos las vistas para no gastar memoria. ViewHolder es el contenedor de vistas, cada fila tiene Tipo (Focus / Break), fecha, hora, duración y estado. 
+
+Y en el MainActivity lo que hace es el flujo de la aplicacion, es decir, se crea sesión, empieza timer, termina onSessionFinished(), se guarda en SQLite, cambia modo y la UI se actualiza
+
+Lo que más me costo trabajo fue que eran muchos archivos, y pues algunos (AndroidManifest) no los puse en donde iban y con eso no me dejaba compilar, y en el build tenia que fijarme que todo estuviera bien y pues en general en cada uno de los archivos, y en especial el orden. Fueron muchas cosas al mismo tiempo y me confundi un poco. Igual creo que otra cosa que se me complico, fue hacer lo de por semana, por que no se puede hacer la comparacion e hice la lsita de dias y ya de esta forma se logro realizar la consulta.
